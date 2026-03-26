@@ -72,7 +72,7 @@ Both versions use the same structure:
 ![Final UI_HTML](screenshots/overall-html-ui.png)  
 ![Pomodoro_HTML](screenshots/pomodoro-set-panel-html.png)  
 ![Past_Session_HTML](screenshots/past-sessions-panel-html.png)
-![Overall_UI_PY](screenshots/overall-py-ui.png)  
+![Overall_UI_PY](screenshots/overall-py-ui.png)
 
 ---
 
