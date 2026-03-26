@@ -14,7 +14,7 @@ You can use either one.
 
 ## 🚀 HTML Version (Recommended)
 
-**File:** `study_tracker.html`
+**File:** `focuslog.html`
 
 - Open and use instantly  
 - Clean and modern UI  
@@ -28,7 +28,7 @@ You can use either one.
 
 ## 🖥️ Python Version
 
-**File:** `study_tracker.py`
+**File:** `focuslog.py`
 
 - Runs as a desktop app  
 - Saves logs to `study_logs.json`  
@@ -36,9 +36,9 @@ You can use either one.
 
 **Run:**
 ```bash
-python study_tracker.py
+python focuslog.py
 ```
-
+Requirement for Python Version- have any python 3.X version
 ---
 
 ## 🧠 How to Use
