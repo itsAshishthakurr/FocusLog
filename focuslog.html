@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusLog</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #1e293b;
+            --sub: #6b7280;
+            --border: #e2e8f0;
+            --study: #0e7490;
+            --break: #d97706;
+            --danger: #ef4444;
+            --pomo: #9333ea;
+            --past: #0f766e;
+            --export: #6366f1;
+            --radius: 12px;
+        }
+
+        html.dark {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --sub: #94a3b8;
+            --border: #334155;
+            --study: #22d3ee;
+            --break: #fbbf24;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 32px 16px;
+            transition: background .3s, color .3s;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--study);
+        }
+
+        .theme-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--sub);
+            font-size: 1.3rem;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background .2s;
+        }
+
+        .theme-btn:hover {
+            background: var(--border);
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .07);
+            border: 2px solid transparent;
+            transition: border-color .3s;
+            margin-bottom: 32px;
+        }
+
+        .card.mode-study {
+            border-color: var(--study);
+        }
+
+        .card.mode-break {
+            border-color: var(--break);
+        }
+
+        /* ── Inputs ── */
+        label.field-lbl {
+            display: block;
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--sub);
+            margin-bottom: 6px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            font-size: .95rem;
+            transition: border-color .2s, box-shadow .2s;
+            margin-bottom: 20px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--study);
+            box-shadow: 0 0 0 3px rgba(14, 116, 144, .15);
+        }
+
+        /* ── Timer ── */
+        .timer-wrap {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .mode-label {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--sub);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .mode-label.study {
+            color: var(--study);
+        }
+
+        .mode-label.break-c {
+            color: var(--break);
+        }
+
+        .timer {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Buttons ── */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-weight: 700;
+            font-size: .85rem;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: opacity .2s, transform .1s;
+            letter-spacing: .02em;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: .88;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .btn-study {
+            background: var(--study);
+            color: #fff;
+        }
+
+        .btn-break {
+            background: var(--break);
+            color: #fff;
+        }
+
+        .btn-stop {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-pomo {
+            background: var(--pomo);
+            color: #fff;
+        }
+
+        .btn-past {
+            background: var(--past);
+            color: #fff;
+        }
+
+        .btn-export {
+            background: var(--export);
+            color: #fff;
+        }
+
+        .btn-ghost {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        /* ── History ── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .log-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            transition: background .3s;
+        }
+
+        .log-card.study-card {
+            border-left: 4px solid var(--study);
+        }
+
+        .log-card.break-card {
+            border-left: 4px solid var(--break);
+        }
+
+        .log-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .log-type-study {
+            color: var(--study);
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .log-type-break {
+            color: var(--break);
+            font-weight: 700;
+            font-size: .9rem;
+        }
+
+        .log-date {
+            font-size: .75rem;
+            color: var(--sub);
+        }
+
+        .log-subject {
+            font-weight: 600;
+            font-size: .9rem;
+            margin-bottom: 4px;
+        }
+
+        .log-dur {
+            font-size: .8rem;
+            color: var(--sub);
+        }
+
+        .log-dur b {
+            color: var(--text);
+        }
+
+        .del-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--danger);
+            font-size: .78rem;
+            font-family: inherit;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background .15s;
+        }
+
+        .del-btn:hover {
+            background: rgba(239, 68, 68, .1);
+        }
+
+        .empty-msg {
+            color: var(--sub);
+            font-size: .9rem;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* ── Modals ── */
+        .modal-bg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-bg.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 420px;
+            width: calc(100% - 32px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+        }
+
+        .modal h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .modal p {
+            color: var(--sub);
+            font-size: .87rem;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        /* Past Session Modal specifics */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: .73rem;
+            font-weight: 600;
+            color: var(--sub);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+            font-size: .9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--study);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .ongoing-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .82rem;
+            color: var(--past);
+            font-weight: 600;
+            margin-bottom: 14px;
+            cursor: pointer;
+        }
+
+        .ongoing-row input {
+            width: auto;
+            margin: 0;
+        }
+
+        .err-msg {
+            color: var(--danger);
+            font-size: .8rem;
+            min-height: 18px;
+            margin-bottom: 4px;
+        }
+
+        /* hidden */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Focus<span>Log</span></div>
+            <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card" id="trackerCard">
+            <label for="subjectInput" class="field-lbl">Current Subject / Task</label>
+            <input type="text" id="subjectInput" class="text-input" placeholder="e.g. Calculus, Reading, Project...">
+
+            <div class="timer-wrap">
+                <div class="mode-label" id="modeLabel">Ready to Start</div>
+                <div class="timer" id="timerDisplay">00:00:00</div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-study" id="studyBtn">▶ Study</button>
+                <button class="btn btn-break" id="breakBtn">☕ Break</button>
+                <button class="btn btn-stop" id="stopBtn" disabled>⏹ Stop &amp; Log</button>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-pomo" id="pomoBtn">⏱ Pomodoro</button>
+                <button class="btn btn-past" id="pastBtn">+ Add Past Session</button>
+                <button class="btn btn-export" id="exportBtn">📊 Export</button>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="section-title">Activity History</div>
+        <hr class="divider">
+        <div id="logsContainer">
+            <p class="empty-msg">Loading…</p>
+        </div>
+
+    </div>
+
+    <!-- ── Stop Confirm Modal ── -->
+    <div class="modal-bg" id="stopModal">
+        <div class="modal">
+            <h3>Confirm Log</h3>
+            <p>Stop and log your <b id="modalMode"></b> session of <b id="modalTime"></b>?</p>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancelStopBtn">Cancel</button>
+                <button class="btn btn-study" id="confirmStopBtn">Yes, Log It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Delete Confirm Modal ── -->
+    <div class="modal-bg" id="deleteModal">
+        <div class="modal">
+            <h3>Delete Log</h3>
+            <p id="deleteModalMsg">Are you sure you want to delete this log?</p>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancelDeleteBtn">Cancel</button>
+                <button class="btn btn-stop" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Add Past Session Modal ── -->
+    <div class="modal-bg" id="pastModal">
+        <div class="modal">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <h3 style="margin:0;">Add Past Session</h3>
+                <button id="timeFmtToggle" style="
+                font-family:inherit;font-size:.75rem;font-weight:700;
+                padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);
+                background:var(--bg);color:var(--sub);cursor:pointer;">
+                    Switch to 24h
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Subject / Task</label>
+                <input type="text" id="pastSubject" placeholder="e.g. Physics, Reading…">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Session Type</label>
+                    <select id="pastType">
+                        <option value="Study">📚 Study</option>
+                        <option value="Break">☕ Break</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="pastDate">
+                </div>
+            </div>
+
+            <!-- 12h time pickers -->
+            <div class="form-row" id="timePickers12">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <div style="display:flex;gap:6px;">
+                        <select id="startHr12"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option>12</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                        </select>
+                        <select id="startMin12"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option value="00">00</option>
+                            <option value="05">05</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                        </select>
+                        <select id="startAmPm"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option>AM</option>
+                            <option>PM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="endGroup12">
+                    <label>End Time</label>
+                    <div style="display:flex;gap:6px;">
+                        <select id="endHr12"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option>12</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                        </select>
+                        <select id="endMin12"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option value="00">00</option>
+                            <option value="05">05</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                        </select>
+                        <select id="endAmPm"
+                            style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.88rem;">
+                            <option>AM</option>
+                            <option>PM</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 24h time pickers -->
+            <div class="form-row hidden" id="timePickers24">
+                <div class="form-group">
+                    <label>Start Time (HH:MM)</label>
+                    <input type="time" id="pastStart24"
+                        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;">
+                </div>
+                <div class="form-group" id="endGroup24">
+                    <label>End Time (HH:MM)</label>
+                    <input type="time" id="pastEnd24"
+                        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:inherit;font-size:.9rem;">
+                </div>
+            </div>
+
+            <label class="ongoing-row">
+                <input type="checkbox" id="ongoingChk">
+                Still ongoing — resume timer from start time
+            </label>
+
+            <div class="err-msg" id="pastError"></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancelPastBtn">Cancel</button>
+                <button class="btn btn-past" id="savePastBtn">Save Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Pomodoro Modal ── -->
+    <div class="modal-bg" id="pomoModal">
+        <div class="modal">
+            <h3>Pomodoro Timer</h3>
+            <div class="form-group">
+                <label>Duration (minutes)</label>
+                <input type="number" id="pomoDurInput" value="25" min="1" max="240">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancelPomoBtn">Cancel</button>
+                <button class="btn btn-pomo" id="confirmPomoBtn">Start Pomodoro</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Constants ──────────────────────────────────────────────────
+        const LS_KEY = 'focuslog_v2';
+        const THEME_KEY = 'focuslog_theme';
+
+        // ── State ──────────────────────────────────────────────────────
+        let state = {
+            mode: null,          // 'study' | 'break'
+            isRunning: false,
+            startTime: 0,        // epoch ms
+            elapsedSec: 0,
+            intervalId: null,
+            subject: '',
+            pomodoro: false,
+            pomoDurSec: 1500,
+            logs: [],
+            pendingDeleteIdx: null,
+        };
+
+        // ── UI refs ────────────────────────────────────────────────────
+        const $ = id => document.getElementById(id);
+        const ui = {
+            card: $('trackerCard'),
+            subjectInput: $('subjectInput'),
+            modeLabel: $('modeLabel'),
+            timer: $('timerDisplay'),
+            studyBtn: $('studyBtn'),
+            breakBtn: $('breakBtn'),
+            stopBtn: $('stopBtn'),
+            pomoBtn: $('pomoBtn'),
+            pastBtn: $('pastBtn'),
+            exportBtn: $('exportBtn'),
+            logsContainer: $('logsContainer'),
+            themeBtn: $('themeBtn'),
+
+            stopModal: $('stopModal'),
+            modalMode: $('modalMode'),
+            modalTime: $('modalTime'),
+            cancelStopBtn: $('cancelStopBtn'),
+            confirmStopBtn: $('confirmStopBtn'),
+
+            deleteModal: $('deleteModal'),
+            deleteModalMsg: $('deleteModalMsg'),
+            cancelDeleteBtn: $('cancelDeleteBtn'),
+            confirmDeleteBtn: $('confirmDeleteBtn'),
+
+            pastModal: $('pastModal'),
+            pastSubject: $('pastSubject'),
+            pastType: $('pastType'),
+            pastDate: $('pastDate'),
+            ongoingChk: $('ongoingChk'),
+            pastError: $('pastError'),
+            cancelPastBtn: $('cancelPastBtn'),
+            savePastBtn: $('savePastBtn'),
+            timeFmtToggle: $('timeFmtToggle'),
+            timePickers12: $('timePickers12'),
+            timePickers24: $('timePickers24'),
+            startHr12: $('startHr12'),
+            startMin12: $('startMin12'),
+            startAmPm: $('startAmPm'),
+            endHr12: $('endHr12'),
+            endMin12: $('endMin12'),
+            endAmPm: $('endAmPm'),
+            endGroup12: $('endGroup12'),
+            endGroup24: $('endGroup24'),
+            pastStart24: $('pastStart24'),
+            pastEnd24: $('pastEnd24'),
+
+            pomoModal: $('pomoModal'),
+            pomoDurInput: $('pomoDurInput'),
+            cancelPomoBtn: $('cancelPomoBtn'),
+            confirmPomoBtn: $('confirmPomoBtn'),
+        };
+
+        // ── Helpers ────────────────────────────────────────────────────
+        const fmt = s => {
+            const h = String(Math.floor(s / 3600)).padStart(2, '0');
+            const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+            const sec = String(s % 60).padStart(2, '0');
+            return `${h}:${m}:${sec}`;
+        };
+
+        const durStr = s => {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            let out = '';
+            if (h) out += h + 'h ';
+            if (m) out += m + 'm ';
+            if (sec || !out) out += sec + 's';
+            return out.trim();
+        };
+
+        // Use LOCAL date — not UTC (fixes "today blocked" timezone bug)
+        const localDateStr = (d = new Date()) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        };
+        const nowDateStr = () => localDateStr();
+
+        // ── Storage ────────────────────────────────────────────────────
+        const loadLogs = () => {
+            try {
+                const raw = localStorage.getItem(LS_KEY);
+                state.logs = raw ? JSON.parse(raw) : [];
+                state.logs.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+            } catch { state.logs = []; }
+            renderLogs();
+        };
+
+        const saveLogs = () => {
+            try { localStorage.setItem(LS_KEY, JSON.stringify(state.logs)); }
+            catch (e) { console.error(e); }
+        };
+
+        // ── Timer ──────────────────────────────────────────────────────
+        const startTimer = mode => {
+            if (state.isRunning) return;
+            state.mode = mode;
+            state.isRunning = true;
+            state.startTime = Date.now();
+            state.elapsedSec = 0;
+            state.subject = ui.subjectInput.value.trim() || 'Uncategorized Focus';
+
+            ui.subjectInput.disabled = true;
+            ui.studyBtn.disabled = true;
+            ui.breakBtn.disabled = true;
+            ui.stopBtn.disabled = false;
+
+            const label = mode === 'study' ? 'STUDYING' : 'ON BREAK';
+            ui.modeLabel.textContent = `${label}: ${state.subject}`;
+            ui.modeLabel.className = `mode-label ${mode === 'study' ? 'study' : 'break-c'}`;
+            ui.card.className = `card mode-${mode}`;
+
+            tick();
+        };
+
+        // startTimerFrom: resume counting up from a past epoch ms timestamp
+        const startTimerFrom = (mode, subjectText, startEpochMs) => {
+            if (state.isRunning) return;
+            state.mode = mode;
+            state.isRunning = true;
+            state.startTime = startEpochMs;
+            state.elapsedSec = Math.floor((Date.now() - startEpochMs) / 1000);
+            state.subject = subjectText || 'Uncategorized Focus';
+
+            ui.subjectInput.value = state.subject;
+            ui.subjectInput.disabled = true;
+            ui.studyBtn.disabled = true;
+            ui.breakBtn.disabled = true;
+            ui.stopBtn.disabled = false;
+
+            const label = mode === 'study' ? 'STUDYING (resumed)' : 'ON BREAK (resumed)';
+            ui.modeLabel.textContent = `${label}: ${state.subject}`;
+            ui.modeLabel.className = `mode-label ${mode === 'study' ? 'study' : 'break-c'}`;
+            ui.card.className = `card mode-${mode}`;
+
+            tick();
+        };
+
+        const tick = () => {
+            if (!state.isRunning) return;
+            state.elapsedSec = Math.floor((Date.now() - state.startTime) / 1000);
+
+            if (state.pomodoro) {
+                const remaining = state.pomoDurSec - state.elapsedSec;
+                if (remaining <= 0) {
+                    ui.timer.textContent = '00:00:00';
+                    alert('Pomodoro complete! 🎉');
+                    resetTimer();
+                    return;
+                }
+                ui.timer.textContent = fmt(remaining);
+            } else {
+                ui.timer.textContent = fmt(state.elapsedSec);
+            }
+            state.intervalId = setTimeout(tick, 1000);
+        };
+
+        const handleStop = () => {
+            if (!state.isRunning) return;
+            ui.modalMode.textContent = state.mode === 'study' ? 'Study' : 'Break';
+            ui.modalTime.textContent = fmt(state.elapsedSec);
+            ui.confirmStopBtn.className = `btn ${state.mode === 'study' ? 'btn-study' : 'btn-break'}`;
+            openModal(ui.stopModal);
+        };
+
+        const logTime = () => {
+            if (state.elapsedSec < 5) { resetTimer(); return; }
+            saveSession(
+                state.mode === 'study' ? 'Study' : 'Break',
+                state.subject,
+                new Date(state.startTime).toISOString(),
+                state.elapsedSec
+            );
+            resetTimer();
+        };
+
+        const resetTimer = () => {
+            clearTimeout(state.intervalId);
+            state.isRunning = false;
+            state.mode = null;
+            state.elapsedSec = 0;
+            state.startTime = 0;
+            state.intervalId = null;
+
+            ui.timer.textContent = '00:00:00';
+            ui.modeLabel.textContent = 'Ready to Start';
+            ui.modeLabel.className = 'mode-label';
+            ui.card.className = 'card';
+            ui.subjectInput.disabled = false;
+            ui.studyBtn.disabled = false;
+            ui.breakBtn.disabled = false;
+            ui.stopBtn.disabled = true;
+        };
+
+        const saveSession = (type, subject, startIso, durationSeconds) => {
+            state.logs.unshift({
+                type, subject,
+                startTime: startIso,
+                durationSeconds,
+                durationMinutes: Math.round(durationSeconds / 60),
+            });
+            saveLogs();
+            renderLogs();
+        };
+
+        // ── Pomodoro ───────────────────────────────────────────────────
+        const openPomo = () => {
+            ui.pomoDurInput.value = 25;
+            openModal(ui.pomoModal);
+        };
+        const confirmPomo = () => {
+            const mins = parseInt(ui.pomoDurInput.value) || 25;
+            state.pomodoro = true;
+            state.pomoDurSec = mins * 60;
+            ui.modeLabel.textContent = `POMODORO (${mins} min)`;
+            closeModal(ui.pomoModal);
+        };
+
+        // ── Time Format Toggle ─────────────────────────────────────────
+        let use24h = false;
+        const setTimeFmt = (to24) => {
+            use24h = to24;
+            ui.timeFmtToggle.textContent = to24 ? 'Switch to AM/PM' : 'Switch to 24h';
+            ui.timePickers12.classList.toggle('hidden', to24);
+            ui.timePickers24.classList.toggle('hidden', !to24);
+        };
+
+        // Convert 12h dropdowns → { h, m } in 24h
+        const get12hTime = (hrSel, minSel, ampmSel) => {
+            let h = parseInt(hrSel.value);
+            const m = parseInt(minSel.value);
+            const ap = ampmSel.value;
+            if (ap === 'AM') { if (h === 12) h = 0; }
+            else { if (h !== 12) h += 12; }
+            return { h, m };
+        };
+
+        // Preset 12h dropdowns to match a given Date
+        const preset12h = (d, hrSel, minSel, ampmSel) => {
+            const h = d.getHours(), m = d.getMinutes();
+            const ap = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12; if (h12 === 0) h12 = 12;
+            hrSel.value = String(h12);
+            minSel.value = String(Math.floor(m / 5) * 5).padStart(2, '0');
+            ampmSel.value = ap;
+        };
+
+        // Build a LOCAL Date from a date string + hour + minute
+        const buildLocalDt = (dateStr, h, m) => {
+            const [y, mo, d] = dateStr.split('-').map(Number);
+            return new Date(y, mo - 1, d, h, m, 0);
+        };
+
+        const getStartDt = (dateStr) => {
+            if (use24h) {
+                const val = ui.pastStart24.value;
+                if (!val) return null;
+                const [h, m] = val.split(':').map(Number);
+                return buildLocalDt(dateStr, h, m);
+            }
+            const { h, m } = get12hTime(ui.startHr12, ui.startMin12, ui.startAmPm);
+            return buildLocalDt(dateStr, h, m);
+        };
+
+        const getEndDt = (dateStr) => {
+            if (use24h) {
+                const val = ui.pastEnd24.value;
+                if (!val) return null;
+                const [h, m] = val.split(':').map(Number);
+                return buildLocalDt(dateStr, h, m);
+            }
+            const { h, m } = get12hTime(ui.endHr12, ui.endMin12, ui.endAmPm);
+            return buildLocalDt(dateStr, h, m);
+        };
+
+        // ── Past Session ───────────────────────────────────────────────
+        const openPastModal = () => {
+            const now = new Date();
+            ui.pastDate.value = localDateStr(now);
+            ui.pastDate.max = localDateStr(now);
+            ui.pastSubject.value = ui.subjectInput.value.trim();
+            ui.ongoingChk.checked = false;
+            ui.endGroup12.classList.remove('hidden');
+            ui.endGroup24.classList.remove('hidden');
+            ui.pastError.textContent = '';
+            // Pre-fill times to current moment
+            preset12h(now, ui.startHr12, ui.startMin12, ui.startAmPm);
+            preset12h(now, ui.endHr12, ui.endMin12, ui.endAmPm);
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            ui.pastStart24.value = `${hh}:${mm}`;
+            ui.pastEnd24.value = `${hh}:${mm}`;
+            openModal(ui.pastModal);
+        };
+
+        const savePastSession = () => {
+            ui.pastError.textContent = '';
+            const subj = ui.pastSubject.value.trim() || 'Uncategorized Focus';
+            const type = ui.pastType.value;
+            const dateVal = ui.pastDate.value;
+            const ongoing = ui.ongoingChk.checked;
+            const now = new Date();
+
+            if (!dateVal) { ui.pastError.textContent = 'Please pick a date.'; return; }
+
+            // Compare date only (local, no UTC shift)
+            const [y, mo, d] = dateVal.split('-').map(Number);
+            const chosenDay = new Date(y, mo - 1, d);
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (chosenDay > todayStart) { ui.pastError.textContent = 'Date cannot be in the future.'; return; }
+
+            const startDt = getStartDt(dateVal);
+            if (!startDt) { ui.pastError.textContent = 'Please enter a start time.'; return; }
+            // Block only if exact datetime (date+time) is in the future
+            if (startDt > now) { ui.pastError.textContent = 'Start time cannot be in the future.'; return; }
+
+            if (ongoing) {
+                if (state.isRunning) { ui.pastError.textContent = 'A session is already running. Stop it first.'; return; }
+                closeModal(ui.pastModal);
+                startTimerFrom(type === 'Study' ? 'study' : 'break', subj, startDt.getTime());
+                return;
+            }
+
+            const endDt = getEndDt(dateVal);
+            if (!endDt) { ui.pastError.textContent = 'Please enter an end time.'; return; }
+            if (endDt > now) { ui.pastError.textContent = 'End time cannot be in the future.'; return; }
+            if (endDt <= startDt) { ui.pastError.textContent = 'End time must be after start time.'; return; }
+
+            const dur = Math.floor((endDt - startDt) / 1000);
+            closeModal(ui.pastModal);
+            saveSession(type, subj, startDt.toISOString(), dur);
+        };
+
+        // ── Delete ─────────────────────────────────────────────────────
+        const askDelete = idx => {
+            state.pendingDeleteIdx = idx;
+            const log = state.logs[idx];
+            ui.deleteModalMsg.textContent =
+                `Delete this ${log.type} session?\n"${log.subject}" — ${durStr(log.durationSeconds)}`;
+            openModal(ui.deleteModal);
+        };
+        const confirmDelete = () => {
+            if (state.pendingDeleteIdx === null) return;
+            state.logs.splice(state.pendingDeleteIdx, 1);
+            state.pendingDeleteIdx = null;
+            saveLogs();
+            renderLogs();
+            closeModal(ui.deleteModal);
+        };
+
+        // ── Render Logs ────────────────────────────────────────────────
+        const renderLogs = () => {
+            const c = ui.logsContainer;
+            c.innerHTML = '';
+            if (!state.logs.length) {
+                c.innerHTML = '<p class="empty-msg">No logs yet. Start tracking your time!</p>';
+                return;
+            }
+            state.logs.forEach((log, idx) => {
+                const isStudy = log.type === 'Study';
+                const icon = isStudy ? '📚' : '☕';
+                const typeClass = isStudy ? 'log-type-study' : 'log-type-break';
+                const cardClass = isStudy ? 'study-card' : 'break-card';
+
+                const dt = new Date(log.startTime);
+                const dateStr = dt.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+                const timeStr = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const div = document.createElement('div');
+                div.className = `log-card ${cardClass}`;
+                div.innerHTML = `
+            <div class="log-top">
+                <span class="${typeClass}">${icon} ${log.type}</span>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="log-date">${dateStr} at ${timeStr}</span>
+                    <button class="del-btn" data-idx="${idx}">🗑 Delete</button>
+                </div>
+            </div>
+            <div class="log-subject">${log.subject}</div>
+            <div class="log-dur">Duration: <b>${durStr(log.durationSeconds)}</b></div>
+        `;
+                div.querySelector('.del-btn').addEventListener('click', () => askDelete(idx));
+                c.appendChild(div);
+            });
+        };
+
+        // ── Export ─────────────────────────────────────────────────────
+        const exportLogs = () => {
+            const blob = new Blob([JSON.stringify(state.logs, null, 4)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'focuslog_export.json';
+            a.click();
+        };
+
+        // ── Theme ──────────────────────────────────────────────────────
+        const setTheme = dark => {
+            document.documentElement.classList.toggle('dark', dark);
+            ui.themeBtn.textContent = dark ? '☀️' : '🌙';
+            localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+        };
+        const loadTheme = () => {
+            const stored = localStorage.getItem(THEME_KEY);
+            const dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme:dark)').matches;
+            setTheme(dark);
+        };
+
+        // ── Modal helpers ──────────────────────────────────────────────
+        const openModal = el => el.classList.add('open');
+        const closeModal = el => el.classList.remove('open');
+
+        // ── Init ───────────────────────────────────────────────────────
+        window.onload = () => {
+            loadTheme();
+            loadLogs();
+            setTimeFmt(false); // default: AM/PM
+
+            // Timer buttons
+            ui.studyBtn.addEventListener('click', () => startTimer('study'));
+            ui.breakBtn.addEventListener('click', () => startTimer('break'));
+            ui.stopBtn.addEventListener('click', handleStop);
+
+            // Stop modal
+            ui.cancelStopBtn.addEventListener('click', () => closeModal(ui.stopModal));
+            ui.confirmStopBtn.addEventListener('click', () => { closeModal(ui.stopModal); logTime(); });
+
+            // Delete modal
+            ui.cancelDeleteBtn.addEventListener('click', () => closeModal(ui.deleteModal));
+            ui.confirmDeleteBtn.addEventListener('click', confirmDelete);
+
+            // Past session modal
+            ui.pastBtn.addEventListener('click', openPastModal);
+            ui.cancelPastBtn.addEventListener('click', () => closeModal(ui.pastModal));
+            ui.savePastBtn.addEventListener('click', savePastSession);
+            ui.timeFmtToggle.addEventListener('click', () => setTimeFmt(!use24h));
+            ui.ongoingChk.addEventListener('change', () => {
+                const hide = ui.ongoingChk.checked;
+                ui.endGroup12.classList.toggle('hidden', hide);
+                ui.endGroup24.classList.toggle('hidden', hide);
+            });
+
+            // Pomodoro modal
+            ui.pomoBtn.addEventListener('click', openPomo);
+            ui.cancelPomoBtn.addEventListener('click', () => closeModal(ui.pomoModal));
+            ui.confirmPomoBtn.addEventListener('click', confirmPomo);
+
+            // Export
+            ui.exportBtn.addEventListener('click', exportLogs);
+
+            // Theme
+            ui.themeBtn.addEventListener('click', () => {
+                setTheme(!document.documentElement.classList.contains('dark'));
+            });
+
+            // Close modals on backdrop click
+            [ui.stopModal, ui.deleteModal, ui.pastModal, ui.pomoModal].forEach(m => {
+                m.addEventListener('click', e => { if (e.target === m) closeModal(m); });
+            });
+        };
+    </script>
+</body>
+
+</html>
