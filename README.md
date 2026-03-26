@@ -67,11 +67,11 @@ Both versions use the same structure:
 
 ## 📸 Screenshots
 
-![Light UI](screenshots/ui-light.png)  
-![Dark UI](screenshots/ui-dark.png)  
-![Final UI](screenshots/final-look-after-a-focus.png)  
-![Pomodoro](screenshots/custom-pomodoro-time.png)  
-
+![Light UI_HTML](screenshots/ui-html-light.png)  
+![Dark UI_HTML](screenshots/ui-html-dark.png)  
+![Final UI_HTML](screenshots/overall-html-ui.png)  
+![Pomodoro_HTML](screenshots/pomodoro-set-panel-html.png)  
+![Past_Session](screenshots/past-sessions-panel-html.png)
 ---
 
 ## 🤔 Which One Should You Use?
